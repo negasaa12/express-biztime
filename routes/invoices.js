@@ -2,7 +2,7 @@ const db = require('../db');
 const express = require("express");
 const router = express.Router();
 
-
+const slugify = require('slugify');
 
 
 router.get('/', async function (req,res,next){
@@ -65,19 +65,37 @@ router.post("/", async function (req, res, next) {
     try {
       let {name, description} = req.body;
       let code = req.params.code;
-  
-      const result = await db.query(
+      let paidDate = null;
+      const currResult = await db.query(
             `UPDATE companies
              SET name=$1, description=$2
              WHERE code = $3
              RETURNING code, name, description`,
           [name, description, code]);
   
-      if (result.rows.length === 0) {
+      if (currResult.rows.length === 0) {
         throw new ExpressError(`No such company: ${code}`, 404)
-      } else {
-        return res.json({"company": result.rows[0]});
-      }
+      } 
+
+      
+    const currPaidDate = currResult.rows[0].paid_date;
+
+    if (!currPaidDate && paid) {
+      paidDate = new Date();
+    } else if (!paid) {
+      paidDate = null
+    } else {
+      paidDate = currPaidDate;
+    }
+
+    const result = await db.query(
+          `UPDATE invoices
+           SET amt=$1, paid=$2, paid_date=$3
+           WHERE id=$4
+           RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+        [amt, paid, paidDate, id]);
+
+    return res.json({"invoice": result.rows[0]});
     }
   
     catch (err) {

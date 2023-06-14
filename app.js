@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-
+const slugify = require('slugify');
 const app = express();
 const ExpressError = require("./expressError")
 
