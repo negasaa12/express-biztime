@@ -78,6 +78,34 @@ describe("POST /companies", ()=>{
 })
 
 
+
+
+describe("DELETE /companies/:id", ()=>{
+
+    let testCompany;
+    beforeEach( async()=>{
+
+        const results =  await db.query(`
+        INSERT INTO companies
+        VALUES ('apple', 'Apple Computer', 'Maker of OSX.') 
+        RETURNING code, name, description`)
+    
+        testCompany = results.rows[0]
+    })
+
+
+    test('delete a single company', async()=>{
+
+        const res = await request(app).delete(`/companies/apple`)
+        expect(res.body).toEqual(
+            {status: "deleted"}
+        )
+    })
+
+})
+
+
+
 describe("PATCH /companies/:id", ()=>{
 
     let testCompany;
@@ -94,9 +122,10 @@ describe("PATCH /companies/:id", ()=>{
 
     test('update a single company', async()=>{
 
-        const res = await request(app).put(`/companies/${testCompany.code}`).send({code: 'Tech', name: "Computers", description: 'amazing things'})
+        const res = await request(app).put(`/companies/apple`).send({code: 'Tech', name: "Computers", description: 'amazing things'})
+        
         expect(res.body).toEqual(
-            {company: {code: 'Tech', name: "Computers", description: 'amazing things'} }
+            {company: { code: testCompany.code, name: "Computers", description: 'amazing things'} }
         )
     })
 

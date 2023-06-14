@@ -59,7 +59,7 @@ router.post('/', async (req, res, next) => {
         const result = await db.query('UPDATE companies SET  name=$1, description=$2 WHERE code = $3 RETURNING code, name, description', [name,description,code])
 
       
-            return res.json({"company": result.rows[0]});
+            return res.json({company: result.rows[0]});
           
 
     } 
